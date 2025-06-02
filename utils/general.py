@@ -899,13 +899,26 @@ def non_max_suppression(
          list of detections, on (n,6) tensor per image [xyxy, conf, cls]
     """
 
-    if isinstance(prediction, (list, tuple)):  # YOLO model in validation model, output = (inference_out, loss_out)
-        prediction = prediction[0]  # select only inference output
+    # if isinstance(prediction, (list, tuple)):  # YOLO model in validation model, output = (inference_out, loss_out)
+    #     prediction = prediction[0]  # select only inference output
 
+    # device = prediction.device
+    # mps = 'mps' in device.type  # Apple MPS
+    # if mps:  # MPS not fully supported yet, convert tensors to CPU before NMS
+    #     prediction = prediction.cpu()
+    # bs = prediction.shape[0]  # batch size
+    # nc = prediction.shape[1] - nm - 4  # number of classes
+    # mi = 4 + nc  # mask start index
+    # xc = prediction[:, 4:mi].amax(1) > conf_thres  # candidates
+    if isinstance(prediction, (list, tuple)): 
+        processed_predictions = []
+        for pred_tensor in prediction:
+            processed_tensor = pred_tensor[0]
+            processed_predictions.append(processed_tensor)
+        prediction = processed_predictions[0]
+        
     device = prediction.device
     mps = 'mps' in device.type  # Apple MPS
-    if mps:  # MPS not fully supported yet, convert tensors to CPU before NMS
-        prediction = prediction.cpu()
     bs = prediction.shape[0]  # batch size
     nc = prediction.shape[1] - nm - 4  # number of classes
     mi = 4 + nc  # mask start index
